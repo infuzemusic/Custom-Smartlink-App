@@ -10,7 +10,7 @@ across a shared platform domain.
 
 Research and architecture only. No implementation yet.
 
-**Current scope: single artist (the author), not a SaaS.** Start with
+**Current scope: one owner, several music projects — not a SaaS.** Start with
 [`docs/00-solo-build.md`](docs/00-solo-build.md) — it supersedes the phased plan in
 `docs/03`, which assumed multi-tenancy. The remaining docs stay useful as market research
 and as the shape to grow into if this is ever productised.
@@ -19,7 +19,7 @@ and as the shape to grow into if this is ever productised.
 
 | Doc | What's in it |
 |---|---|
-| [`docs/00-solo-build.md`](docs/00-solo-build.md) | What to build when it's just you: what drops away, the Spotify pre-save wall, a weekend-sized v1, and the cheap decisions that keep productising possible. |
+| [`docs/00-solo-build.md`](docs/00-solo-build.md) | The active plan: Meta asset structure across several projects, host-routed architecture, the Spotify pre-save wall, and a per-project setup checklist. |
 | [`docs/01-facebook-authority.md`](docs/01-facebook-authority.md) | The "Facebook authority scoring" problem diagnosed properly — what Meta actually does, why shared smartlink domains lose, and the nine-part solution set. **Start here.** |
 | [`docs/02-platform-architecture.md`](docs/02-platform-architecture.md) | The ten subsystems that have to be built, suggested stack, data model. |
 | [`docs/03-risks-and-build-plan.md`](docs/03-risks-and-build-plan.md) | Competitive landscape, risk register, phased build plan, defensible advantages. |
