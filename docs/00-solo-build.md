@@ -36,19 +36,27 @@ aggressive campaign on one alias can't drag the others down.
 | Facebook Page | **1 per project** | You need these anyway — each act has its own artist Page. Isolation comes free. |
 | Domain | **1 per project** | Must be a root domain (eTLD+1). Verified in your single portfolio — no conflict, since you own them all. |
 | Pixel / dataset | **1 per project** | Never share a pixel across aliases: it merges audiences that shouldn't be merged and pools signal quality. |
-| Ad account | **start with 1, split later** | The real constraint — see below. |
+| Ad account | **1 per project** | Already in place. Full isolation available from day one. |
 
-**The ad account constraint.** A new Business Portfolio starts with **1–5 ad accounts**.
-That grows to 25–75 once you're verified with clean spend history, but not immediately. So:
+**You already have an ad account per project**, so all three reputation entities — Page,
+domain, ad account — are isolated per alias once the domains land. Worth knowing that this
+is not the default position: a new Business Portfolio is capped at 1–5 ad accounts and only
+grows to 25–75 with verification and clean spend history, so you're starting from an
+established portfolio rather than building one.
 
-- Start with **one shared ad account**, campaigns named by project.
-- You still get two of the three isolation layers free (separate Page, separate domain), which
-  is most of the benefit.
-- Request more accounts as your limit grows, and split out any project whose risk profile
-  differs — heavier paid pushes, edgier creative, anything you'd hate to have take the rest
-  down with it.
-- Don't fragment prematurely: a new ad account has no spend history, so you reset learning
-  and trust every time you split.
+Two things to get right now that the accounts exist:
+
+- **Assign assets deliberately.** Each project's pixel and Page should be assigned to that
+  project's ad account and nothing else. Domains are verified once at the portfolio level and
+  are visible across it — that's fine and unavoidable, since you own them all.
+- **Don't consolidate later for convenience.** Merging campaigns into one account to simplify
+  reporting would throw away the isolation you already have. Keep reporting in a spreadsheet
+  or a dashboard instead.
+
+**The domain is your missing layer.** If those ad accounts currently point at a shared
+smartlink host, you already have two-thirds of the isolation and are losing it at the last
+step — every project's post-click signal lands on someone else's domain reputation. That is
+precisely the gap this build closes.
 
 **Budget:** roughly $12–15 per domain per year, times the number of projects you'll actually
 advertise. That's the only per-project cost of the whole architecture.
@@ -111,6 +119,7 @@ lib/
   "tracking": {
     "meta": {
       "pixelId": "000000000000000",
+      "adAccountId": "act_000000000000000",
       "capiTokenEnv": "META_CAPI_TOKEN_ALIAS_ONE",
       "testEventCode": null
     }
@@ -158,7 +167,8 @@ Half an hour each, all manual, all one-time:
 - [ ] Buy the root domain; add it to the hosting project
 - [ ] Create the Facebook Page (if the project doesn't have one)
 - [ ] Verify the domain in your Business Portfolio
-- [ ] Create the pixel/dataset; put its ID in `project.json`
+- [ ] Create the pixel/dataset; assign it to this project's ad account only
+- [ ] Put the pixel ID and ad account ID in `project.json`
 - [ ] Create a system user token for CAPI; set `META_CAPI_TOKEN_<SLUG>`
 - [ ] Define URL-rule custom conversions for each DSP click
 - [ ] Confirm events arrive in Events Manager, deduplicated, with EMQ climbing
