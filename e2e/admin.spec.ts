@@ -61,7 +61,7 @@ await page.click('text=Add domain');
 await page.waitForSelector(`text=${slug}.example`);
 check('domain is added and marked primary', await page.isVisible('.pill.ok'));
 
-await page.fill('#hostname', 'aliasone.com'); // already owned by the seeded project
+await page.fill('#hostname', 'nightdrive.test'); // already owned by a seeded project
 await page.click('text=Add domain');
 const domainErr = cardWith(page, '#hostname').locator('.err');
 await domainErr.waitFor();

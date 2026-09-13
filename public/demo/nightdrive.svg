@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b1f2a"/><stop offset="0.55" stop-color="#123f4a"/>
+      <stop offset="1" stop-color="#e0653a"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="600" fill="url(#g)"/>
+  <circle cx="300" cy="392" r="86" fill="#f6c66a"/>
+  <rect y="392" width="600" height="208" fill="#0b1f2a" opacity="0.82"/>
+  <g stroke="#e0653a" stroke-width="2" opacity="0.5">
+    <path d="M0 430H600M0 470H600M0 520H600M0 580H600"/>
+  </g>
+  <text x="300" y="150" font-family="Helvetica,Arial,sans-serif" font-size="46" font-weight="700"
+        fill="#f3efe6" text-anchor="middle" letter-spacing="6">NIGHTDRIVE</text>
+</svg>

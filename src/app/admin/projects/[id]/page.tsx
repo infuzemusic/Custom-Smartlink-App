@@ -143,7 +143,7 @@ export default async function ProjectPage({ params }: Props) {
           <input type="hidden" name="projectId" value={project.id} />
           <div className="field" style={{ marginTop: 14 }}>
             <label htmlFor="hostname">Hostname</label>
-            <input id="hostname" name="hostname" type="text" placeholder="aliasone.com" required />
+            <input id="hostname" name="hostname" type="text" placeholder="yourdomain.com" required />
           </div>
         </ActionForm>
       </div>

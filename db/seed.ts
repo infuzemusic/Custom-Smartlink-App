@@ -14,30 +14,79 @@ const ACCOUNT = { name: 'Owner', email: process.env.SEED_ACCOUNT_EMAIL ?? null }
 
 const PROJECTS = [
   {
-    slug: 'alias-one',
-    name: 'Alias One',
-    tagline: 'New single out now',
-    theme: { accent: '#0e5c52' },
-    profiles: { Instagram: 'https://instagram.com/', Spotify: 'https://open.spotify.com/' },
-    hosts: ['aliasone.com', 'www.aliasone.com', 'localhost'],
+    slug: 'nightdrive',
+    name: 'Nightdrive',
+    tagline: 'Synth-leaning club records out of Manchester',
+    theme: { accent: '#e0653a' },
+    profiles: {
+      Spotify: 'https://open.spotify.com/',
+      Bandcamp: 'https://bandcamp.com/',
+      Instagram: 'https://instagram.com/',
+    },
+    // Add 'localhost' so the project resolves in development.
+    hosts: ['nightdrive.test', 'www.nightdrive.test', 'localhost'],
     tracking: {
       meta_pixel_id: null as string | null,
       meta_ad_account_id: null as string | null,
-      capi_token_ref: 'META_CAPI_TOKEN_ALIAS_ONE',
-      test_event_code_ref: 'META_TEST_EVENT_CODE_ALIAS_ONE',
+      capi_token_ref: 'META_CAPI_TOKEN_NIGHTDRIVE',
+      test_event_code_ref: 'META_TEST_EVENT_CODE_NIGHTDRIVE',
     },
     releases: [
       {
-        slug: 'first-release',
-        title: 'First Release',
-        subtitle: 'Alias One',
-        artwork_url: null as string | null,
-        isrc: null as string | null,
-        release_at: null as string | null, // null = already out
+        slug: 'midnight-loop',
+        title: 'Midnight Loop',
+        subtitle: 'Nightdrive',
+        artwork_url: '/demo/nightdrive.svg' as string | null,
+        isrc: 'GBKQU2412345' as string | null,
+        release_at: null as string | null, // already out
         destinations: [
           { dsp: 'spotify', url: 'https://open.spotify.com/', sort_order: 1 },
           { dsp: 'apple-music', url: 'https://music.apple.com/', sort_order: 2 },
           { dsp: 'youtube-music', url: 'https://music.youtube.com/', sort_order: 3 },
+          { dsp: 'bandcamp', url: 'https://bandcamp.com/', sort_order: 4 },
+          { dsp: 'soundcloud', url: 'https://soundcloud.com/', sort_order: 5 },
+        ],
+      },
+      {
+        slug: 'static-bloom',
+        title: 'Static Bloom',
+        subtitle: 'Nightdrive feat. Ayo',
+        artwork_url: '/demo/nightdrive.svg' as string | null,
+        isrc: 'GBKQU2498765' as string | null,
+        // Still upcoming, so the page renders its pre-release state.
+        release_at: new Date(Date.now() + 21 * 864e5).toISOString() as string | null,
+        destinations: [
+          { dsp: 'spotify', url: 'https://open.spotify.com/', sort_order: 1 },
+          { dsp: 'apple-music', url: 'https://music.apple.com/', sort_order: 2 },
+          { dsp: 'deezer', url: 'https://deezer.com/', sort_order: 3 },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'low-tide',
+    name: 'Low Tide',
+    tagline: 'Ambient and modular improvisations',
+    theme: { accent: '#1b4d45' },
+    profiles: { Instagram: 'https://instagram.com/' },
+    hosts: ['lowtide.test'],
+    tracking: {
+      meta_pixel_id: null as string | null,
+      meta_ad_account_id: null as string | null,
+      capi_token_ref: 'META_CAPI_TOKEN_LOW_TIDE',
+      test_event_code_ref: null as string | null,
+    },
+    releases: [
+      {
+        slug: 'shoreline',
+        title: 'Shoreline',
+        subtitle: 'Low Tide',
+        artwork_url: '/demo/low-tide.svg' as string | null,
+        isrc: 'GBKQU2411111' as string | null,
+        release_at: null as string | null,
+        destinations: [
+          { dsp: 'spotify', url: 'https://open.spotify.com/', sort_order: 1 },
+          { dsp: 'apple-music', url: 'https://music.apple.com/', sort_order: 2 },
         ],
       },
     ],

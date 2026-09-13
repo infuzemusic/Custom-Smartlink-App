@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600">
+  <rect width="600" height="600" fill="#eae5da"/>
+  <g fill="none" stroke="#1b4d45" stroke-width="3" opacity="0.85">
+    <path d="M0 330c60-28 120-28 180 0s120 28 180 0 120-28 180 0"/>
+    <path d="M0 372c60-28 120-28 180 0s120 28 180 0 120-28 180 0"/>
+    <path d="M0 414c60-28 120-28 180 0s120 28 180 0 120-28 180 0"/>
+    <path d="M0 456c60-28 120-28 180 0s120 28 180 0 120-28 180 0"/>
+  </g>
+  <circle cx="300" cy="196" r="74" fill="none" stroke="#c2502f" stroke-width="4"/>
+  <text x="300" y="546" font-family="Georgia,serif" font-size="34" fill="#1b4d45"
+        text-anchor="middle" letter-spacing="10">LOW TIDE</text>
+</svg>
