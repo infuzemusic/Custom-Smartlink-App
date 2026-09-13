@@ -10,10 +10,16 @@ across a shared platform domain.
 
 Research and architecture only. No implementation yet.
 
+**Current scope: single artist (the author), not a SaaS.** Start with
+[`docs/00-solo-build.md`](docs/00-solo-build.md) — it supersedes the phased plan in
+`docs/03`, which assumed multi-tenancy. The remaining docs stay useful as market research
+and as the shape to grow into if this is ever productised.
+
 ## Documents
 
 | Doc | What's in it |
 |---|---|
+| [`docs/00-solo-build.md`](docs/00-solo-build.md) | What to build when it's just you: what drops away, the Spotify pre-save wall, a weekend-sized v1, and the cheap decisions that keep productising possible. |
 | [`docs/01-facebook-authority.md`](docs/01-facebook-authority.md) | The "Facebook authority scoring" problem diagnosed properly — what Meta actually does, why shared smartlink domains lose, and the nine-part solution set. **Start here.** |
 | [`docs/02-platform-architecture.md`](docs/02-platform-architecture.md) | The ten subsystems that have to be built, suggested stack, data model. |
 | [`docs/03-risks-and-build-plan.md`](docs/03-risks-and-build-plan.md) | Competitive landscape, risk register, phased build plan, defensible advantages. |
@@ -33,6 +39,7 @@ Research and architecture only. No implementation yet.
 
 - **Will artists buy and connect their own domain?** The entire differentiator depends on
   yes. Validate with real artists before Phase 1.
-- **Can you get Spotify extended API quota?** Pre-saves at scale now require a registered
-  business, a launched service and ~250k MAU. Start that conversation immediately; phase the
-  product so the links business ships without it.
+- **Spotify pre-save is unavailable to individuals.** Development mode caps at 5 users;
+  extended quota requires a registered business and ~250k MAU. Use Spotify's native
+  Countdown Pages, build Apple Music pre-add via MusicKit, or embed a third party. See
+  `docs/00-solo-build.md`.
