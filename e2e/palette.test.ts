@@ -61,5 +61,41 @@ const hex = mixedPalette.accentLight.toLowerCase();
 const blueish = parseInt(hex.slice(5, 7), 16) > parseInt(hex.slice(1, 3), 16);
 check(`monochrome cover with one colour picks the colour (${mixedPalette.accentLight})`, blueish);
 
+// The same artwork must not change the page's colour just because it arrived as a JPEG
+// rather than a PNG. This caught a near-tied ranking where a large near-black region
+// out-scored a smaller vivid one, and trivial encoding noise decided the winner.
+function distance(a: string, b: string): number {
+  const px = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const [r1, g1, b1] = px(a) as [number, number, number];
+  const [r2, g2, b2] = px(b) as [number, number, number];
+  return Math.sqrt((r1 - r2) ** 2 + (g1 - g2) ** 2 + (b1 - b2) ** 2);
+}
+
+const sunset = await sharp({ create: { width: 420, height: 420, channels: 3, background: '#123f4a' } })
+  .composite([
+    { input: await sharp({ create: { width: 420, height: 210, channels: 3, background: '#0b1f2a' } }).png().toBuffer(), top: 0, left: 0 },
+    { input: await sharp({ create: { width: 420, height: 150, channels: 3, background: '#e0653a' } }).png().toBuffer(), top: 270, left: 0 },
+    { input: await sharp({ create: { width: 150, height: 150, channels: 3, background: '#f6c66a' } }).png().toBuffer(), top: 180, left: 135 },
+  ])
+  .png()
+  .toBuffer();
+
+const asPng = await extractPalette(sunset);
+const asJpeg = await extractPalette(await sharp(sunset).jpeg().toBuffer());
+const asWebp = await extractPalette(await sharp(sunset).resize(180, 180).webp().toBuffer());
+
+check(
+  `accent survives re-encoding (${asPng.accentLight} / ${asJpeg.accentLight} / ${asWebp.accentLight})`,
+  distance(asPng.accentLight, asJpeg.accentLight) < 12 &&
+    distance(asPng.accentLight, asWebp.accentLight) < 12,
+);
+check(
+  `a vivid band beats a larger near-black one (${asPng.accentLight})`,
+  (() => {
+    const [r, , b] = [1, 3, 5].map((i) => parseInt(asPng.accentLight.slice(i, i + 2), 16)) as [number, number, number];
+    return r > b; // warm, as the sleeve reads — not the dark blue that wins on area alone
+  })(),
+);
+
 console.log(failures === 0 ? '\nAll palette checks passed.' : `\n${failures} check(s) failed.`);
 process.exit(failures === 0 ? 0 : 1);

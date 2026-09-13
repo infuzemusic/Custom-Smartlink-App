@@ -120,7 +120,13 @@ export async function extractPalette(image: Buffer): Promise<Palette> {
     const bucket = buckets.get(key) ?? { r: 0, g: 0, b: 0, weight: 0, count: 0 };
     bucket.r += r; bucket.g += g; bucket.b += b; bucket.count += 1;
     // Colourfulness and mid-lightness both make a colour more usable as an accent.
-    bucket.weight += (0.25 + s) * (1 - Math.abs(l - 0.5));
+    //
+    // The lightness falloff is deliberately steep. A gentler one let a large near-black
+    // region out-score a smaller vivid one on area alone, which left the ranking nearly
+    // tied — so the winner flipped depending on whether the same artwork arrived as a
+    // PNG or a JPEG. Discounting the extremes harder both matches what the eye picks out
+    // and makes the result stable across encodings.
+    bucket.weight += (0.25 + s) * Math.max(0, 1 - Math.abs(l - 0.5) * 1.8);
     buckets.set(key, bucket);
   }
 
