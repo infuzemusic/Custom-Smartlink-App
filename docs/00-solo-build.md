@@ -92,53 +92,50 @@ Don't write a Spotify pre-save flow. Three routes instead:
 ## Architecture
 
 One codebase, one deployment, N domains. The host header selects the project.
+**Postgres from day one** — not JSON files in the repo. The schema carries an `account`
+table with exactly one row for now, so adding users later is inserting rows and putting an
+auth check in front of queries, not restructuring everything.
+
+```sql
+account      id, name, created_at                      -- one row: you
+project      id, account_id, slug, name, theme         -- one per music project
+domain       id, project_id, hostname, is_primary      -- host lookup index
+tracking     id, project_id, meta_pixel_id,
+             meta_ad_account_id, capi_token_ref        -- ref, never the secret
+release      id, project_id, slug, title, artwork,
+             release_at, state                         -- pre-release | live
+destination  id, release_id, dsp, url, region          -- adapter-shaped, not per-DSP columns
+event        id, project_id, release_id, dsp, type,
+             event_id, fbp, fbc, ip, ua, ts, is_bot    -- your own click log
+```
 
 ```
-projects/
-  <project-slug>/
-    project.json           identity, domain(s), theme, tracking IDs
-    releases/
-      <release-slug>.json  artwork, copy, DSP destinations
 app/
   middleware.ts            Host -> project resolution, first-party cookie handling
   [release]/page.tsx       smart link page
   out/[release]/[dsp]      click handler: log -> CAPI -> 302
   api/track                browser event collector
 lib/
-  projects.ts              registry loader + host index
+  projects.ts              host -> project lookup, cached
   meta.ts                  CAPI client, event_id, hashing
 ```
 
-`project.json`:
-
-```json
-{
-  "slug": "alias-one",
-  "name": "Alias One",
-  "hosts": ["aliasone.com", "www.aliasone.com"],
-  "tracking": {
-    "meta": {
-      "pixelId": "000000000000000",
-      "adAccountId": "act_000000000000000",
-      "capiTokenEnv": "META_CAPI_TOKEN_ALIAS_ONE",
-      "testEventCode": null
-    }
-  },
-  "theme": { "accent": "#0E5C52", "font": "Archivo" },
-  "profiles": { "spotifyArtist": "...", "instagram": "..." }
-}
-```
+Managed Postgres (Neon, Supabase) on a free tier is plenty at this volume. Cache the
+host→project lookup in memory; it changes when you add a project, not per request.
 
 Rules that keep this clean:
 
+- **`account_id` on `project` from the first migration.** That single column is the entire
+  difference between "add users later" and "rewrite later". Nothing else needs to anticipate
+  commercialisation.
+- **Secrets stay out of the database.** `capi_token_ref` holds an env var name
+  (`META_CAPI_TOKEN_<SLUG>`), not a token. When it does become commercial that column becomes
+  a KMS key reference — same shape, different backend.
 - **Resolve by host, never by path.** No `/alias-one/release` URLs — each project's pages
   live at the root of its own domain, or the domain isolation is cosmetic.
-- **One CAPI token per project**, referenced by env var *name* in config so no secret is ever
-  committed. Name them predictably: `META_CAPI_TOKEN_<SLUG>`.
 - **Fail loudly on an unknown host.** A misconfigured domain silently falling back to a
   default project would fire one alias's events into another's pixel — the one bug in this
   system that corrupts data you can't clean up afterwards.
-- **DSP destinations as `{ dsp, url, region? }`**, not hardcoded Spotify/Apple fields.
 - Keep the click handler's event payload generic — it shouldn't know it's Meta-specific.
 
 ## The parts that need care
