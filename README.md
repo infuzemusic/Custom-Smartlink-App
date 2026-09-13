@@ -8,7 +8,8 @@ across a shared platform domain.
 
 ## Status
 
-Research and architecture only. No implementation yet.
+Working v1. Smart link pages, host-routed multi-project support, server-set first-party
+cookies, and pixel/CAPI dual-fire with deduplication.
 
 **Current scope: one owner, several music projects — not a SaaS.** Start with
 [`docs/00-solo-build.md`](docs/00-solo-build.md) — it supersedes the phased plan in
@@ -43,3 +44,62 @@ and as the shape to grow into if this is ever productised.
   extended quota requires a registered business and ~250k MAU. Use Spotify's native
   Countdown Pages, build Apple Music pre-add via MusicKit, or embed a third party. See
   `docs/00-solo-build.md`.
+
+
+## Running it
+
+```bash
+npm install
+cp .env.example .env            # set DATABASE_URL, then a CAPI token per project
+npm run db:migrate              # apply db/schema.sql
+npm run db:seed                 # edit the PROJECTS block in db/seed.ts first
+npm run dev
+```
+
+Managed Postgres (Neon, Supabase) on a free tier is ample. `db/seed.ts` seeds `localhost`
+as a hostname for the example project, so `http://localhost:3000` resolves in development.
+
+### Routes
+
+| Route | Does |
+|---|---|
+| `/` | Project hub — releases at the root of that project's own domain |
+| `/<release>` | Smart link page. No auto-redirect, by design |
+| `/out/<release>/<dsp>` | Click handler: logs, fires CAPI, 302s to the DSP |
+| `/api/track` | Server mirror of the browser PageView |
+
+### Per-project setup
+
+Each project needs its own root domain, Facebook Page, pixel and ad account — see
+[`docs/00-solo-build.md`](docs/00-solo-build.md) for the checklist and the reasoning. In the
+database: a `project` row, its hostnames in `domain`, and a `tracking` row holding the pixel
+ID plus the **name** of the env var containing that project's CAPI token
+(`META_CAPI_TOKEN_<SLUG>`). Tokens themselves never go in the database.
+
+Point your Meta custom conversions at the `/out/<release>/<dsp>` URL pattern, or use the
+`DspClick` custom event, which carries the release and DSP in `custom_data`.
+
+### Things worth knowing before changing the code
+
+- **An unknown host 404s and never falls back to a default project.** A silent fallback
+  would fire one project's events into another project's pixel — the one bug here that
+  corrupts data you cannot clean up afterwards.
+- **`_fbp` is set with `httpOnly: false` on purpose.** The Meta pixel reads it from
+  `document.cookie`; if it can't see ours it invents its own, and the browser and server
+  events stop matching. Setting it from a `Set-Cookie` header is what dodges Safari's 7-day
+  ITP cap on JavaScript-set cookies.
+- **`fbp` and `fbc` are sent to Meta unhashed.** Hashing them breaks matching entirely.
+  `em`, `ph` and `external_id` are SHA-256 hashed.
+- **The event id must match on both sides.** The browser generates it, fires the pixel, and
+  passes it to `/out/` as `?eid=`. Mismatched ids double-count, which is worse than sending
+  no server events at all.
+- **A CAPI failure never costs the visitor their click** — the redirect happens regardless.
+
+### Verified
+
+Migration, seed, both page types, server-set `_fbp`, `fbclid` → `_fbc`, the click redirect,
+bot filtering, the PageView mirror, unknown-host 404 and event logging were all exercised
+against a real Postgres. The Conversions API request is built and sent — confirmed by its
+outbound call and graceful failure handling — but **Meta accepting the payload is
+unverified**, since `graph.facebook.com` was unreachable from the build environment. Check
+Events Manager's Test Events tab on first deploy (set `META_TEST_EVENT_CODE_<SLUG>`).
