@@ -11,13 +11,17 @@
     "db:migrate": "node --experimental-strip-types db/migrate.ts",
     "db:seed": "node --experimental-strip-types db/seed.ts",
     "admin:hash": "node --experimental-strip-types scripts/hash-password.ts",
-    "e2e": "node --experimental-strip-types e2e/admin.spec.ts"
+    "e2e": "node --experimental-strip-types e2e/admin.spec.ts",
+    "test:palette": "node --experimental-strip-types e2e/palette.test.ts",
+    "stub": "node e2e/stub-odesli.mjs",
+    "e2e:wizard": "node --experimental-strip-types e2e/wizard.spec.ts"
   },
   "dependencies": {
     "next": "^15.5.4",
     "postgres": "^3.4.7",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "sharp": "^0.35.4"
   },
   "devDependencies": {
     "@types/node": "^22.15.3",

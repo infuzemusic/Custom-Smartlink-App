@@ -85,6 +85,8 @@ check('a token env var that is not set is flagged', true);
 
 // --- releases and destinations -------------------------------------------
 await page.goto(projectUrl);
+// The by-hand form sits behind a disclosure now that the wizard is the main path.
+await page.click('summary:has-text("Or add one by hand")');
 await page.fill('#title', 'E2E Single');
 await page.fill('#slug', 'e2e-single');
 await page.click('text=Add release');

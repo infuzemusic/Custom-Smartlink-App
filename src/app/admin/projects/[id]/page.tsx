@@ -202,6 +202,17 @@ export default async function ProjectPage({ params }: Props) {
             ))}
           </ul>
         )}
+        <p style={{ margin: '16px 0 6px' }}>
+          <a
+            href={`/admin/projects/${project.id}/new`}
+            style={{ fontWeight: 600, color: 'var(--accent)' }}
+          >
+            Create from a streaming link &rarr;
+          </a>{' '}
+          <span className="hint">finds every other service, imports the cover, sets the colour</span>
+        </p>
+        <details style={{ marginTop: 10 }}>
+          <summary className="hint" style={{ cursor: 'pointer' }}>Or add one by hand</summary>
         <ActionForm action={createRelease} submitLabel="Add release">
           <input type="hidden" name="projectId" value={project.id} />
           <div className="grid2" style={{ marginTop: 14 }}>
@@ -215,6 +226,7 @@ export default async function ProjectPage({ params }: Props) {
             </div>
           </div>
         </ActionForm>
+        </details>
       </div>
 
       <div className="card">

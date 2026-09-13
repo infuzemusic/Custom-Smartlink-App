@@ -4,6 +4,7 @@ import { currentProject } from '@/lib/request';
 import { getRelease } from '@/lib/projects';
 import { isLive } from '@/lib/types';
 import { newEventId } from '@/lib/meta';
+import { isHexColour } from '@/lib/palette';
 import { MetaPixel } from '@/components/MetaPixel';
 import { DspButtons } from '@/components/DspButtons';
 
@@ -47,13 +48,28 @@ export default async function ReleasePage({ params }: Props) {
 
   const live = isLive(release);
   const eventId = newEventId();
-  const accent = project.theme.accent;
+
+  /**
+   * Colour the page from the artwork when we sampled it, otherwise from the project.
+   *
+   * Emitted as a scoped <style> rather than an inline style because the accent differs
+   * between light and dark — an inline style cannot carry a media query. Both values are
+   * validated as hex first, since they land inside a stylesheet.
+   */
+  const palette = release.palette;
+  const accentLight = isHexColour(palette?.accentLight) ? palette!.accentLight : project.theme.accent;
+  const accentDark = isHexColour(palette?.accentDark) ? palette!.accentDark : project.theme.accent;
+  const scope = `r${release.id.replace(/-/g, '')}`;
+  const css = [
+    isHexColour(accentLight) ? `.${scope}{--accent:${accentLight}}` : '',
+    isHexColour(accentDark)
+      ? `@media (prefers-color-scheme:dark){.${scope}{--accent:${accentDark}}}`
+      : '',
+  ].join('');
 
   return (
-    <main
-      className="page"
-      style={accent ? ({ ['--accent' as string]: accent } as React.CSSProperties) : undefined}
-    >
+    <main className={`page ${scope}`}>
+      {css && <style dangerouslySetInnerHTML={{ __html: css }} />}
       {project.metaPixelId && (
         <MetaPixel pixelId={project.metaPixelId} eventId={eventId} releaseSlug={release.slug} />
       )}

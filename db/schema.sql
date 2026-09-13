@@ -96,3 +96,18 @@ create table if not exists event (
 );
 create index if not exists event_project_time_idx on event (project_id, created_at desc);
 create index if not exists event_release_idx on event (release_id);
+
+-- Artwork imported from a streaming link, stored here rather than hotlinked so the page
+-- does not depend on a third-party CDN staying up (or on the link staying valid).
+create table if not exists artwork (
+  release_id   uuid primary key references release(id) on delete cascade,
+  content_type text not null,
+  bytes        bytea not null,
+  width        int,
+  height       int,
+  source_url   text,
+  created_at   timestamptz not null default now()
+);
+
+-- Colours sampled from the artwork, already contrast-corrected for both themes.
+alter table release add column if not exists palette jsonb;

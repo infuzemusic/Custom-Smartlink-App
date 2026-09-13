@@ -51,10 +51,10 @@ export const getRelease = cache(
     const rows = await sql<
       {
         id: string; slug: string; title: string; subtitle: string | null;
-        artwork_url: string | null; release_at: Date | null;
+        artwork_url: string | null; release_at: Date | null; palette: Release['palette'];
       }[]
     >`
-      select id, slug, title, subtitle, artwork_url, release_at
+      select id, slug, title, subtitle, artwork_url, release_at, palette
       from release
       where project_id = ${projectId} and slug = ${slug} and is_published
       limit 1
@@ -72,7 +72,7 @@ export const getRelease = cache(
 
     return {
       id: r.id, slug: r.slug, title: r.title, subtitle: r.subtitle,
-      artworkUrl: r.artwork_url, releaseAt: r.release_at,
+      artworkUrl: r.artwork_url, releaseAt: r.release_at, palette: r.palette ?? null,
       destinations: destinations.map<Destination>((d) => ({
         id: d.id, dsp: d.dsp, url: d.url, region: d.region, sortOrder: d.sort_order,
       })),

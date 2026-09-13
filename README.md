@@ -87,11 +87,36 @@ The tracking form takes the **name** of the environment variable holding each pr
 token, and refuses a value that looks like a token. It also shows whether that variable is
 actually set in the running deployment, which is the fastest way to spot why events stopped.
 
+### Creating a release
+
+Paste any streaming link into the wizard and it resolves every other platform through
+Odesli, imports the cover, and samples the page's accent colour from that artwork. You can
+edit the title, subtitle and slug, and untick any platform you don't want listed, before
+creating it.
+
+Artwork is downloaded and stored in Postgres rather than hotlinked, and served from
+`/artwork/<release-id>` on your own domain — streaming services rotate their CDN URLs, and
+a release page whose cover 404s six months later is worse than no cover.
+
+The sampled accent is corrected per theme before it is used: artwork colours are chosen to
+work against each other, not against a page, so a pale yellow would vanish on the light
+background and a deep navy on the dark one. Both variants are pushed to at least 4.5:1
+contrast while keeping the hue. Greyscale artwork gets a neutral accent rather than an
+invented hue.
+
+Adding links by hand still works — it's behind a disclosure on the project page.
+
 ### Testing
 
 ```bash
-npm run e2e    # drives the admin in a real browser; needs the app running
+npm run test:palette   # colour sampling and contrast correction; no server needed
+npm run e2e            # admin flows in a real browser; needs the app running
+npm run stub &         # stands in for api.song.link
+npm run e2e:wizard     # release wizard against that stub
 ```
+
+The wizard suite needs the app started with `ODESLI_BASE_URL=http://127.0.0.1:4010` and
+`ALLOW_LOCAL_FETCH=1` so lookups and artwork downloads hit the stub instead of the internet.
 
 Server actions cannot be meaningfully exercised over plain HTTP, so the admin is covered by
 a browser-driven suite instead: sign-in, every validation path, create/edit/delete for

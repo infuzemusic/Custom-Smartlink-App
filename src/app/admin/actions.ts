@@ -5,6 +5,9 @@ import { redirect } from 'next/navigation';
 import { sql } from '@/lib/db';
 import { requireAdmin, createSession, destroySession, adminHostAllowed } from '@/lib/auth';
 import { verifyPassword } from '@/lib/password';
+import { resolveStreamingUrl, slugify, ResolveError, type ResolvedLink } from '@/lib/resolve';
+import { downloadImage, importArtwork } from '@/lib/artwork';
+import { extractPalette, type Palette } from '@/lib/palette';
 
 const SLUG = /^[a-z0-9][a-z0-9-]*$/;
 const HOSTNAME = /^[a-z0-9][a-z0-9.-]*[a-z0-9]$/;
@@ -242,4 +245,122 @@ export async function deleteDestination(form: FormData): Promise<void> {
   const releaseId = str(form, 'releaseId');
   await sql`delete from destination where id = ${str(form, 'id')}`;
   revalidatePath(`/admin/releases/${releaseId}`);
+}
+
+/* ------------------------------------------------------- release wizard --- */
+
+export type LookupResult =
+  | { ok: true; title: string | null; artistName: string | null; thumbnailUrl: string | null;
+      suggestedSlug: string; links: ResolvedLink[]; palette: Palette | null; paletteNote?: string }
+  | { ok: false; error: string };
+
+/**
+ * Step one of the wizard: one streaming link in, every other platform out, plus the
+ * artwork's colours so the preview can show what the page will look like.
+ *
+ * Artwork failures are not fatal — the links are the valuable part, and a release with
+ * no cover is still a working page.
+ */
+export async function lookupRelease(url: string): Promise<LookupResult> {
+  await requireAdmin();
+  try {
+    const resolved = await resolveStreamingUrl(url);
+    let palette: Palette | null = null;
+    let paletteNote: string | undefined;
+    if (resolved.thumbnailUrl) {
+      try {
+        const { bytes } = await downloadImage(resolved.thumbnailUrl);
+        palette = await extractPalette(bytes);
+      } catch (err) {
+        paletteNote = err instanceof Error ? err.message : 'Could not read the artwork.';
+      }
+    }
+    return {
+      ok: true,
+      title: resolved.title,
+      artistName: resolved.artistName,
+      thumbnailUrl: resolved.thumbnailUrl,
+      suggestedSlug: slugify(resolved.title ?? ''),
+      links: resolved.links,
+      palette,
+      paletteNote,
+    };
+  } catch (err) {
+    return { ok: false, error: err instanceof ResolveError ? err.message : 'Lookup failed.' };
+  }
+}
+
+export type CreateFromLookupInput = {
+  projectId: string;
+  slug: string;
+  title: string;
+  subtitle: string | null;
+  releaseAt: string | null;
+  artworkUrl: string | null;
+  links: ResolvedLink[];
+};
+
+/** Step two: write the release, its chosen links, and the imported artwork. */
+export async function createReleaseFromLookup(
+  input: CreateFromLookupInput,
+): Promise<{ ok: true; releaseId: string } | { ok: false; error: string }> {
+  await requireAdmin();
+
+  const slug = input.slug.trim().toLowerCase();
+  if (!SLUG.test(slug)) return { ok: false, error: 'Slug must be lowercase letters, numbers and hyphens.' };
+  if (!input.title.trim()) return { ok: false, error: 'Title is required.' };
+  if (input.links.length === 0) return { ok: false, error: 'Choose at least one streaming link.' };
+
+  const clash = await sql`select 1 from release where project_id = ${input.projectId} and slug = ${slug}`;
+  if (clash.length > 0) return { ok: false, error: `This project already has a release at /${slug}.` };
+
+  let releaseAt: Date | null = null;
+  if (input.releaseAt) {
+    const parsed = new Date(input.releaseAt);
+    if (Number.isNaN(parsed.getTime())) return { ok: false, error: 'Release date is not a valid date.' };
+    releaseAt = parsed;
+  }
+
+  const [release] = await sql<{ id: string }[]>`
+    insert into release (project_id, slug, title, subtitle, release_at)
+    values (${input.projectId}, ${slug}, ${input.title.trim()}, ${input.subtitle?.trim() || null}, ${releaseAt})
+    returning id
+  `;
+  const releaseId = release!.id;
+
+  for (const [index, link] of input.links.entries()) {
+    if (!SLUG.test(link.dsp) || !/^https?:\/\//i.test(link.url)) continue;
+    await sql`
+      insert into destination (release_id, dsp, url, region, sort_order)
+      values (${releaseId}, ${link.dsp}, ${link.url}, '*', ${index + 1})
+      on conflict (release_id, dsp, region) do update set url = excluded.url
+    `;
+  }
+
+  if (input.artworkUrl) {
+    try {
+      await importArtwork(releaseId, input.artworkUrl);
+    } catch (err) {
+      // The release is already usable; artwork can be re-imported from its page.
+      console.error('[wizard] artwork import failed', err);
+    }
+  }
+
+  revalidatePath(`/admin/projects/${input.projectId}`);
+  return { ok: true, releaseId };
+}
+
+/** Re-run artwork import and recolour for a release that already exists. */
+export async function reimportArtwork(_prev: ActionState, form: FormData): Promise<ActionState> {
+  await requireAdmin();
+  const releaseId = str(form, 'releaseId');
+  const source = str(form, 'sourceUrl');
+  if (!/^https?:\/\//i.test(source)) return { error: 'Enter the URL of an image to import.' };
+  try {
+    await importArtwork(releaseId, source);
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Artwork import failed.' };
+  }
+  revalidatePath(`/admin/releases/${releaseId}`);
+  return {};
 }

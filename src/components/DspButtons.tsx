@@ -1,22 +1,7 @@
 'use client';
 
 import type { Destination } from '@/lib/types';
-
-const LABELS: Record<string, string> = {
-  spotify: 'Spotify',
-  'apple-music': 'Apple Music',
-  'youtube-music': 'YouTube Music',
-  youtube: 'YouTube',
-  deezer: 'Deezer',
-  tidal: 'Tidal',
-  amazon: 'Amazon Music',
-  bandcamp: 'Bandcamp',
-  soundcloud: 'SoundCloud',
-  beatport: 'Beatport',
-};
-
-const label = (dsp: string) =>
-  LABELS[dsp] ?? dsp.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+import { dspLabel } from '@/lib/dsp';
 
 /**
  * Every link is a real <a> to /out/..., so it works without JavaScript and can be
@@ -63,7 +48,7 @@ export function DspButtons({
             href={`/out/${encodeURIComponent(releaseSlug)}/${encodeURIComponent(d.dsp)}`}
             onClick={onClick(d.dsp)}
           >
-            <span className="dsp-name">{label(d.dsp)}</span>
+            <span className="dsp-name">{dspLabel(d.dsp)}</span>
             <span className="dsp-cta">{ctaVerb}</span>
           </a>
         </li>

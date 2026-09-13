@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import { isSignedIn } from '@/lib/auth';
 import { sql } from '@/lib/db';
-import { updateRelease, deleteRelease, saveDestination, deleteDestination } from '../../actions';
+import { updateRelease, deleteRelease, saveDestination, deleteDestination, reimportArtwork } from '../../actions';
 import { ActionForm } from '@/components/admin/ActionForm';
 import { ConfirmButton } from '@/components/admin/Confirm';
 
@@ -23,6 +23,7 @@ export default async function ReleasePage({ params }: Props) {
       id: string; project_id: string; slug: string; title: string; subtitle: string | null;
       artwork_url: string | null; isrc: string | null; upc: string | null;
       release_at: Date | null; is_published: boolean;
+      palette: { accentLight: string; accentDark: string; swatches: string[] } | null;
       project_name: string; hostname: string | null;
     }[]
   >`
@@ -146,6 +147,32 @@ export default async function ReleasePage({ params }: Props) {
           <div className="field">
             <label htmlFor="sortOrder">Order</label>
             <input id="sortOrder" name="sortOrder" type="number" defaultValue={destinations.length + 1} />
+          </div>
+        </ActionForm>
+      </div>
+
+      <div className="card">
+        <h2>Artwork</h2>
+        <p className="lede">
+          Importing stores the image here and re-samples the page colour from it, so the page
+          keeps working when the streaming service rotates its CDN URLs.
+        </p>
+        {release.palette && (
+          <div className="palette" style={{ marginTop: 0, paddingTop: 0, borderTop: 'none' }}>
+            <span className="swatches">
+              {release.palette.swatches.map((hex: string) => (
+                <i key={hex} className="swatch" style={{ background: hex }} title={hex} />
+              ))}
+            </span>
+            <span className="pill">light {release.palette.accentLight}</span>
+            <span className="pill">dark {release.palette.accentDark}</span>
+          </div>
+        )}
+        <ActionForm action={reimportArtwork} submitLabel="Import artwork">
+          <input type="hidden" name="releaseId" value={release.id} />
+          <div className="field" style={{ marginTop: 14 }}>
+            <label htmlFor="sourceUrl">Image URL</label>
+            <input id="sourceUrl" name="sourceUrl" type="url" placeholder="https://…/cover.jpg" required />
           </div>
         </ActionForm>
       </div>

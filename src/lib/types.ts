@@ -18,8 +18,11 @@ export type Destination = {
   sortOrder: number;
 };
 
+export type Palette = { accentLight: string; accentDark: string; swatches: string[] };
+
 export type Release = {
   id: string;
+  palette: Palette | null;
   slug: string;
   title: string;
   subtitle: string | null;
