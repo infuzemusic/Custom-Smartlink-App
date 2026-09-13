@@ -1,0 +1,38 @@
+# Custom Smartlink App
+
+A multi-tenant smartlink / pre-save platform for musicians, in the vein of Symphony,
+Hypeddit and Song.so — built around one structural differentiator: **every artist's links
+run on a domain the artist owns, with the artist's own Meta pixel and Conversions API**, so
+Meta ad reputation, attribution and measurement are isolated per artist instead of pooled
+across a shared platform domain.
+
+## Status
+
+Research and architecture only. No implementation yet.
+
+## Documents
+
+| Doc | What's in it |
+|---|---|
+| [`docs/01-facebook-authority.md`](docs/01-facebook-authority.md) | The "Facebook authority scoring" problem diagnosed properly — what Meta actually does, why shared smartlink domains lose, and the nine-part solution set. **Start here.** |
+| [`docs/02-platform-architecture.md`](docs/02-platform-architecture.md) | The ten subsystems that have to be built, suggested stack, data model. |
+| [`docs/03-risks-and-build-plan.md`](docs/03-risks-and-build-plan.md) | Competitive landscape, risk register, phased build plan, defensible advantages. |
+
+## Two things to know before reading
+
+1. **Research was conducted under a restrictive network egress policy.** `song.so`,
+   `hypeddit.com`, `symphonyos.co`, `developers.facebook.com`, `developer.spotify.com` and
+   `help.linkfire.com` were all unreachable. Findings are from server-side web search and
+   first-principles reconstruction. Claims that could not be verified firsthand are marked
+   as such — most importantly, **Song.so's specific "authority scoring" claim is unverified.**
+2. **There is no open-source prior art.** Symphony, Hypeddit and Song.so are closed SaaS with
+   no public code. Only component-level open source exists (Odesli API wrappers, MusicKit
+   token generators, link-in-bio clones). This is a from-scratch build.
+
+## The two decisions that gate everything else
+
+- **Will artists buy and connect their own domain?** The entire differentiator depends on
+  yes. Validate with real artists before Phase 1.
+- **Can you get Spotify extended API quota?** Pre-saves at scale now require a registered
+  business, a launched service and ~250k MAU. Start that conversation immediately; phase the
+  product so the links business ships without it.
