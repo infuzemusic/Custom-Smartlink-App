@@ -67,6 +67,36 @@ as a hostname for the example project, so `http://localhost:3000` resolves in de
 | `/<release>` | Smart link page. No auto-redirect, by design |
 | `/out/<release>/<dsp>` | Click handler: logs, fires CAPI, 302s to the DSP |
 | `/api/track` | Server mirror of the browser PageView |
+| `/admin` | Manage projects, domains, tracking, releases and links |
+
+### Admin
+
+```bash
+npm run admin:hash -- yourpassword   # prints ADMIN_PASSWORD_HASH
+```
+
+Set `ADMIN_HOST`, `ADMIN_PASSWORD_HASH` and `SESSION_SECRET`, then sign in at
+`https://<ADMIN_HOST>/admin`. It manages projects, their domains, per-project tracking IDs,
+releases and DSP links, and shows 30-day view/click/bot/CAPI-failure counts per project.
+
+`ADMIN_HOST` must not be one of your project domains — the admin 404s anywhere else, so it
+is never served from a page you run ads to. Leaving it unset disables the admin in
+production entirely rather than exposing it.
+
+The tracking form takes the **name** of the environment variable holding each project's CAPI
+token, and refuses a value that looks like a token. It also shows whether that variable is
+actually set in the running deployment, which is the fastest way to spot why events stopped.
+
+### Testing
+
+```bash
+npm run e2e    # drives the admin in a real browser; needs the app running
+```
+
+Server actions cannot be meaningfully exercised over plain HTTP, so the admin is covered by
+a browser-driven suite instead: sign-in, every validation path, create/edit/delete for
+projects, domains, releases and destinations, and sign-out. It cleans up after itself.
+Set `CHROMIUM_PATH` if your Playwright package and installed browser builds differ.
 
 ### Per-project setup
 
