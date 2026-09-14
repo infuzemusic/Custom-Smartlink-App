@@ -23,6 +23,7 @@ and as the shape to grow into if this is ever productised.
 | [`docs/00-solo-build.md`](docs/00-solo-build.md) | The active plan: Meta asset structure across several projects, host-routed architecture, the Spotify pre-save wall, and a per-project setup checklist. |
 | [`docs/01-facebook-authority.md`](docs/01-facebook-authority.md) | The "Facebook authority scoring" problem diagnosed properly — what Meta actually does, why shared smartlink domains lose, and the nine-part solution set. **Start here.** |
 | [`docs/02-platform-architecture.md`](docs/02-platform-architecture.md) | The ten subsystems that have to be built, suggested stack, data model. |
+| [`docs/04-deploy.md`](docs/04-deploy.md) | Getting it online: Vercel or container, environment, per-project domains, and a first-deploy checklist. |
 | [`docs/03-risks-and-build-plan.md`](docs/03-risks-and-build-plan.md) | Competitive landscape, risk register, phased build plan, defensible advantages. |
 
 ## Two things to know before reading
@@ -105,6 +106,11 @@ contrast while keeping the hue. Greyscale artwork gets a neutral accent rather t
 invented hue.
 
 Adding links by hand still works — it's behind a disclosure on the project page.
+
+### Deploying
+
+See [`docs/04-deploy.md`](docs/04-deploy.md). Vercel needs no extra configuration; the
+`Dockerfile` covers any container host. `GET /healthz` reports database connectivity.
 
 ### Testing
 
