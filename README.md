@@ -23,6 +23,7 @@ and as the shape to grow into if this is ever productised.
 | [`docs/00-solo-build.md`](docs/00-solo-build.md) | The active plan: Meta asset structure across several projects, host-routed architecture, the Spotify pre-save wall, and a per-project setup checklist. |
 | [`docs/01-facebook-authority.md`](docs/01-facebook-authority.md) | The "Facebook authority scoring" problem diagnosed properly — what Meta actually does, why shared smartlink domains lose, and the nine-part solution set. **Start here.** |
 | [`docs/02-platform-architecture.md`](docs/02-platform-architecture.md) | The ten subsystems that have to be built, suggested stack, data model. |
+| [`docs/05-testing-before-launch.md`](docs/05-testing-before-launch.md) | How to verify the whole system in stages — most of it locally, without deploying or spending anything. |
 | [`docs/04-deploy.md`](docs/04-deploy.md) | Getting it online: Vercel or container, environment, per-project domains, and a first-deploy checklist. |
 | [`docs/03-risks-and-build-plan.md`](docs/03-risks-and-build-plan.md) | Competitive landscape, risk register, phased build plan, defensible advantages. |
 
@@ -120,6 +121,17 @@ npm run e2e            # admin flows in a real browser; needs the app running
 npm run stub &         # stands in for api.song.link
 npm run e2e:wizard     # release wizard against that stub
 ```
+
+Before going live, work through
+[`docs/05-testing-before-launch.md`](docs/05-testing-before-launch.md):
+
+```bash
+npm run resolve:check -- <a real streaming url>   # the live link resolver
+npm run capi:check -- --project <slug>            # print the exact Conversions API payload
+npm run capi:check -- --project <slug> --send     # deliver it as a test event
+```
+
+`capi:check` refuses to send without a test event code, so it cannot reach real reporting.
 
 The wizard suite needs the app started with `ODESLI_BASE_URL=http://127.0.0.1:4010` and
 `ALLOW_LOCAL_FETCH=1` so lookups and artwork downloads hit the stub instead of the internet.

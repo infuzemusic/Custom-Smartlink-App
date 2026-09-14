@@ -53,6 +53,29 @@ function buildUserData(u: UserData) {
 }
 
 /**
+ * The exact event object sent to Meta, without the access token.
+ *
+ * Split out from sending so tooling can print what would go over the wire — the
+ * payload can then be checked field by field, or pasted into Meta's Payload Helper,
+ * before any of it is aimed at a real dataset.
+ */
+export function buildEventPayload(event: CapiEvent): Record<string, unknown> {
+  return {
+    event_name: event.eventName,
+    event_time: event.eventTime ?? Math.floor(Date.now() / 1000),
+    event_id: event.eventId,
+    event_source_url: event.eventSourceUrl,
+    action_source: 'website',
+    user_data: buildUserData(event.userData),
+    ...(event.customData ? { custom_data: event.customData } : {}),
+  };
+}
+
+export function capiEndpoint(pixelId: string): string {
+  return `https://graph.facebook.com/${API_VERSION}/${pixelId}/events`;
+}
+
+/**
  * Send one server event to the project's own dataset.
  *
  * The event_id here MUST match the eventID passed to the browser pixel for the same
@@ -72,17 +95,7 @@ export async function sendCapiEvent(
     : undefined;
 
   const body: Record<string, unknown> = {
-    data: [
-      {
-        event_name: event.eventName,
-        event_time: event.eventTime ?? Math.floor(Date.now() / 1000),
-        event_id: event.eventId,
-        event_source_url: event.eventSourceUrl,
-        action_source: 'website',
-        user_data: buildUserData(event.userData),
-        ...(event.customData ? { custom_data: event.customData } : {}),
-      },
-    ],
+    data: [buildEventPayload(event)],
     access_token: token,
     ...(testEventCode ? { test_event_code: testEventCode } : {}),
   };
@@ -90,15 +103,12 @@ export async function sendCapiEvent(
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const res = await fetch(
-      `https://graph.facebook.com/${API_VERSION}/${project.metaPixelId}/events`,
-      {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(body),
-        signal: controller.signal,
-      },
-    );
+    const res = await fetch(capiEndpoint(project.metaPixelId), {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
     if (!res.ok) {
       console.error('[capi] %s %s', res.status, (await res.text()).slice(0, 400));
       return 'failed';

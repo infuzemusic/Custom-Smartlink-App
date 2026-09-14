@@ -14,7 +14,9 @@
     "e2e": "node --experimental-strip-types e2e/admin.spec.ts",
     "test:palette": "node --experimental-strip-types e2e/palette.test.ts",
     "stub": "node e2e/stub-odesli.mjs",
-    "e2e:wizard": "node --experimental-strip-types e2e/wizard.spec.ts"
+    "e2e:wizard": "node --experimental-strip-types e2e/wizard.spec.ts",
+    "capi:check": "node --experimental-strip-types scripts/capi-check.ts",
+    "resolve:check": "node --experimental-strip-types scripts/resolve-check.ts"
   },
   "dependencies": {
     "next": "^15.5.4",
